@@ -70,8 +70,8 @@ export class OutOfBandController extends Controller {
   })
   @Post('/create-invitation')
   public async createInvitation(
-    @Res() internalServerError: TsoaResponse<500, { message: string }>,
-    @Body() config?: Omit<CreateOutOfBandInvitationConfig, 'routing'> // routing prop removed because of issues with public key serialization
+    @Res() internalServerError: TsoaResponse<500, { message: string; error: unknown }>,
+    @Body() config?: Omit<CreateOutOfBandInvitationConfig, 'routing'>
   ) {
     try {
       const oobRecord = await this.agent.oob.createInvitation(config)
@@ -102,8 +102,8 @@ export class OutOfBandController extends Controller {
   })
   @Post('/create-legacy-invitation')
   public async createLegacyInvitation(
-    @Res() internalServerError: TsoaResponse<500, { message: string }>,
-    @Body() config?: Omit<CreateLegacyInvitationConfig, 'routing'> // routing prop removed because of issues with public key serialization
+    @Res() internalServerError: TsoaResponse<500, { message: string; error: unknown }>,
+    @Body() config?: Omit<CreateLegacyInvitationConfig, 'routing'>
   ) {
     try {
       const { outOfBandRecord, invitation } = await this.agent.oob.createLegacyInvitation(config)
@@ -167,6 +167,8 @@ export class OutOfBandController extends Controller {
     @Res() internalServerError: TsoaResponse<500, { message: string }>
   ) {
     const { invitation, ...config } = invitationRequest
+
+    const inv = JsonTransformer.fromJSON(invitation, OutOfBandInvitation)
 
     try {
       const invite = new OutOfBandInvitation({ ...invitation, handshakeProtocols: invitation.handshake_protocols })
